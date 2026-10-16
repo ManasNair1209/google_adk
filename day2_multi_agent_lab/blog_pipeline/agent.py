@@ -1,6 +1,5 @@
-from google.adk.agents import Agent
+from google.adk.agents import Agent, SequentialAgent
 from google.adk.models.google_llm import Gemini
-from google.adk.workflow import START, Workflow
 
 writer_agent = Agent(
     name="WriterAgent",
@@ -26,10 +25,10 @@ Issues: {review_notes}""",
     output_key="final_post",
 )
 
-# Equivalent ordered pipeline using Workflow
-root_agent = Workflow(
+# Ordered pipeline: writer -> reviewer -> polisher.
+# Each agent writes its result to session state via output_key, and the next
+# agent reads it back through the {placeholders} in its instruction.
+root_agent = SequentialAgent(
     name="BlogPipelineAgent",
-    edges=[
-        (START, writer_agent, reviewer_agent, polisher_agent),
-    ],
+    sub_agents=[writer_agent, reviewer_agent, polisher_agent],
 )

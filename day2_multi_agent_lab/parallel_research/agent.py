@@ -1,7 +1,6 @@
-from google.adk.agents import Agent
+from google.adk.agents import Agent, ParallelAgent, SequentialAgent
 from google.adk.models.google_llm import Gemini
 from google.adk.tools import google_search
-from google.adk.workflow import JoinNode, START, Workflow
 
 pros_agent = Agent(
     name="ProsAgent",
@@ -27,8 +26,6 @@ cost_agent = Agent(
     output_key="costs",
 )
 
-join_results = JoinNode(name="JoinResearchResults")
-
 # Synthesis agent
 merger_agent = Agent(
     name="MergerAgent",
@@ -40,11 +37,15 @@ Costs: {costs}""",
     output_key="briefing",
 )
 
-# Equivalent pipeline using Workflow (non-deprecated):
-# START -> (pros, cons, cost) in parallel -> join -> merger
-root_agent = Workflow(
+# Fan-out: run the three researchers concurrently; each writes its own output_key.
+research_fanout = ParallelAgent(
+    name="ParallelResearch",
+    sub_agents=[pros_agent, cons_agent, cost_agent],
+)
+
+# Fan-in: run the parallel block first, then the merger reads pros/cons/costs
+# from shared session state and synthesises the final briefing.
+root_agent = SequentialAgent(
     name="ParallelThenMergeAgent",
-    edges=[
-        (START, (pros_agent, cons_agent, cost_agent), join_results, merger_agent),
-    ],
+    sub_agents=[research_fanout, merger_agent],
 )

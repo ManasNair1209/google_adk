@@ -15,3 +15,8 @@ dist/
 .ruff_cache/
 .idea/
 .vscode/
+
+# Generated at runtime — never commit
+.adk/
+*.db
+

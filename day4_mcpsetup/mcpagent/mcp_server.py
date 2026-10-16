@@ -5,7 +5,7 @@ from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("Day4-Enterprise-MCP-Server")
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "day3", "day3_tools_lab", "company.db")
+DB_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "day3_tools_lab", "company.db")
 API_BASE = "http://localhost:8005"
 OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY", "")
 

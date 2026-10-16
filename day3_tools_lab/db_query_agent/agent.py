@@ -167,7 +167,7 @@ You have five database query tools:
 Answer HR questions clearly. Format salary figures with currency (₹).
 If you get a "did you run setup_db.py" error, tell the user to run:
   python setup_db.py
-from the day2_tools_lab folder.""",
+from the day3_tools_lab/db_query_agent folder.""",
     tools=[
         list_departments,
         list_all_employees,
@@ -182,7 +182,7 @@ from the day2_tools_lab folder.""",
 #   STEP 1 — Create the database (only once):
 #     python setup_db.py
 #
-#   STEP 2 — Run the agent (from day2_tools_lab/):
+#   STEP 2 — Run the agent (from day3_tools_lab/):
 #     adk web
 #     → pick "db_query_agent"
 #

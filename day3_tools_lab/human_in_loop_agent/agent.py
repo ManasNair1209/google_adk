@@ -1,42 +1,44 @@
-from google.adk import Agent, Workflow, Event
+from google.adk.agents import Agent
+from google.adk.tools import LongRunningFunctionTool, ToolContext
 
-draft_agent = Agent(
-    name="DraftWriterAgent",
+# Human-in-the-loop in ADK is modelled with a LONG-RUNNING tool. Instead of
+# blocking on input(), the tool returns a "pending" ticket immediately; the
+# surrounding application (or a human) later sends the decision back to the
+# agent as a function response. This is the pattern that works inside `adk web`.
+
+def request_email_approval(
+    recipient: str, subject: str, body: str, tool_context: ToolContext
+) -> dict:
+    """Submits a drafted email for human approval before it is sent.
+
+    Args:
+        recipient: Who the email is addressed to.
+        subject: The email subject line.
+        body: The drafted email body.
+    """
+    return {
+        "status": "pending",
+        "ticket_id": "email-approval-001",
+        "recipient": recipient,
+        "subject": subject,
+        "message": "Draft submitted for human review. Awaiting approval.",
+    }
+
+approval_tool = LongRunningFunctionTool(func=request_email_approval)
+
+root_agent = Agent(
+    name="HumanInLoopAgent",
     model="gemini-3.5-flash-lite",
-    instruction="Write short, professional 3-sentence email drafts. Output ONLY the subject and body.",
-)
+    instruction="""You are an assistant that drafts and sends emails, but a human
+must approve every email before it goes out.
 
-def human_review(node_input: str) -> Event:
-    """Pauses workflow for terminal human approval."""
-    print("\n" + "=" * 50)
-    print("PROPOSED AI DRAFT FOR REVIEW:")
-    print("=" * 50)
-    print(node_input)
-    print("=" * 50)
-
-    decision = input("\nApprove draft? (yes / no): ").strip().lower()
-    if decision in ("yes", "y"):
-        return Event(route=["APPROVED"])
-    reason = input("Reason for rejection: ").strip()
-    return Event(route=["REJECTED"], message=reason or "Draft rejected.")
-
-def send_email(node_input: str) -> Event:
-    print("\n[SUCCESS] Email approved and sent successfully!\n")
-    return Event(message="Email successfully approved and dispatched.")
-
-def request_revision(node_input: str) -> Event:
-    print("\n[REJECTED] Draft returned for revision.\n")
-    return Event(message="Draft rejected. Please re-submit with revised context.")
-
-root_agent = Workflow(
-    name="HumanInLoopWorkflow",
-    edges=[
-        ("START", draft_agent, human_review),
-        (human_review, {
-            "APPROVED": send_email,
-            "REJECTED": request_revision,
-        }),
-    ],
+1. When the user asks you to send an email, write a short, professional draft.
+2. Call request_email_approval with the recipient, subject, and body.
+3. The tool returns status 'pending' -- tell the user the email is awaiting
+   human approval and share the ticket id. Do NOT claim it has been sent.
+4. If a later message says the ticket was APPROVED, confirm the email was sent.
+   If it was REJECTED, apologise and offer to revise the draft.""",
+    tools=[approval_tool],
 )
 
 

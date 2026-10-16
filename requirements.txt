@@ -1,0 +1,21 @@
+# Google ADK hands-on labs — pinned to the versions these labs were built against.
+# Install into a virtual environment:  pip install -r requirements.txt
+
+google-adk==1.20.0
+google-genai==1.75.0
+
+# Model Context Protocol server/client (Day 4)
+mcp==1.13.0
+
+# Demo REST API used by the Day 3 api_caller_agent
+fastapi==0.118.3
+uvicorn==0.53.0
+requests==2.34.2
+
+# Session persistence (Day 5 DatabaseSessionService)
+sqlalchemy==2.1.1
+aiosqlite==0.22.1
+
+# Structured output schemas (Day 7) and config loading
+pydantic==2.13.5
+python-dotenv==1.2.3

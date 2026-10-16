@@ -4,7 +4,7 @@ from mcp import StdioServerParameters
 from google.adk.agents import Agent
 from google.adk.tools.mcp_tool import McpToolset, StdioConnectionParams
 
-MCP_SERVER_SCRIPT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "mcp_server.py"))
+MCP_SERVER_SCRIPT = os.path.abspath(os.path.join(os.path.dirname(__file__), "mcp_server.py"))
 
 server_params = StdioServerParameters(
     command=sys.executable,
